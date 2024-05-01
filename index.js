@@ -29,7 +29,7 @@ const slugify = (str) => {
         .replace(/-+/g, '-'); // remove consecutive hyphens
 }
 
-const getMetadata = (obj) => {
+const getAttributesMetadata = (obj) => {
     let metadata = [];
     Object.keys(obj).forEach((key) => {
         if (key === "Product Code" || key === "Range" || key === "Brand") {
@@ -171,7 +171,7 @@ async function abc() {
             });
             const productData = await productRes.json();
 
-            const productImageURLs = productData?.product?.images?.map((img)=>img.url);
+            const productImageURLs = productData?.product?.images?.map((img) => img.url);
 
             const allProductImages = hostedImages ? [...productImageURLs, ...hostedImages] : [...productImageURLs];
 
@@ -310,9 +310,34 @@ async function abc() {
             const optionsID = data?.product?.options?.[0]?.id;
             prevProductOptionID = optionsID;
 
+            const PDF2D = jsonArray[i]?.["Product 2d Pdf"];
+            let FilesMetadata;
+            if (PDF2D) {
+                try {
+                    const res = await cloudinary.v2.uploader
+                        .upload(`${cloudinaryFolder}/${PDF2D}`, {
+                            folder: "PDF",
+                            use_filename: true,
+                            unique_filename: false,
+                        });
+                    const PdfUrl = res.secure_url;
+
+                    FilesMetadata = [
+                        {
+                            key: "product_2d_pdf",
+                            value: PdfUrl
+                        }
+                    ]
+
+                } catch (err) {
+                    console.log(mainImage, "PDF2D upload to cloudinary error", err)
+                }
+            }
+
             //update metadata
             const productMetadata = {
-                "attributes": JSON.stringify(getMetadata(jsonArray[i]))
+                "attributes": JSON.stringify(getAttributesMetadata(jsonArray[i])),
+                "files": FilesMetadata ? JSON.stringify(FilesMetadata) : undefined
             };
 
             const productMetadataBody = {
