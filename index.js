@@ -1,9 +1,22 @@
 const csv = require('csvtojson');
 const { convert } = require('html-to-text');
+const cloudinary = require('cloudinary');
+
+cloudinary.v2.config({
+    cloud_name: 'disfbqrv5',
+    api_key: '159248614235452',
+    api_secret: 'PxpElsNYhH0jm2OrW_3qc1SJcEw',
+    secure: true,
+});
+
+const cloudinaryFolder = "../../jaquaruk-e6611f194465/jaquaruk-e6611f194465/accessories";
+const csvFilePath = '../../jaquaruk-e6611f194465/jaquaruk-e6611f194465/accessories/productData.csv'
 
 const options = {
     wordwrap: false,
 };
+
+const cookie = "__stripe_mid=69b45612-ba0a-415b-8556-c3a51872a18d344a63; ajs_user_id=usr_01HWQMHRKQPTTR8P91WMFTM36N; ajs_anonymous_id=fc19007d-93cc-48a2-b811-43c2802f1925; connect.sid=s%3Ay3HcmHPb7MUasEh6WLelzK9ljYHgF7AO.%2FjDzC5Gf8gyThbK9r01bcvAZZura6qkDic%2Ffzhi47PI";
 
 const slugify = (str) => {
     return String(str)
@@ -31,7 +44,6 @@ const getMetadata = (obj) => {
 }
 
 async function abc() {
-    const csvFilePath = './productData.csv'
     let jsonArray = await csv().fromFile(csvFilePath);
 
     // jsonArray = jsonArray?.slice(0, 10);
@@ -95,28 +107,86 @@ async function abc() {
 
             const res = await fetch(`http://localhost:9000/admin/products/${prevProductID}/variants`, {
                 "headers": {
-                    "accept": "application/json",
-                    "accept-language": "en-US,en;q=0.9",
                     "content-type": "application/json",
-                    "idempotency-key": "0db85a40-75dd-4fa9-803a-117bb03a5002",
-                    "sec-ch-ua": "\"Chromium\";v=\"124\", \"Google Chrome\";v=\"124\", \"Not-A.Brand\";v=\"99\"",
-                    "sec-ch-ua-mobile": "?0",
-                    "sec-ch-ua-platform": "\"Windows\"",
-                    "sec-fetch-dest": "empty",
-                    "sec-fetch-mode": "cors",
-                    "sec-fetch-site": "same-site",
-                    "cookie": "__stripe_mid=69b45612-ba0a-415b-8556-c3a51872a18d344a63; connect.sid=s%3ANavuHDkOLpjUf2Pr_f8_qfjcIbDVD9gC.iLa7Y9tE9tsZrVXGgl%2FOMMd0ZhcJ3ArNemqYLgsBu3E; ajs_user_id=usr_01HWQMHRKQPTTR8P91WMFTM36N; ajs_anonymous_id=fc19007d-93cc-48a2-b811-43c2802f1925",
-                    "Referer": "http://localhost:7001/",
-                    "Referrer-Policy": "strict-origin-when-cross-origin"
+                    "cookie": cookie,
                 },
                 "body": JSON.stringify(body),
                 "method": "POST"
             });
 
             const data = await res.json();
-            if(!data?.product){
-                console.log("variant data",data)
+            if (!data?.product) {
+                console.log("variant data", data)
             }
+
+            //Upload Product Images (For variant) 
+            const mainImage = jsonArray[i]?.["product image"];
+            let mainImageHosted = "";
+            if (mainImage) {
+                try {
+                    const res = await cloudinary.v2.uploader
+                        .upload(`${cloudinaryFolder}/${mainImage}`, {
+                            folder: '',
+                            resource_type: 'image',
+                            use_filename: true,
+                            unique_filename: false,
+                        });
+                    const imageUrl = res.secure_url;
+                    mainImageHosted = imageUrl;
+                } catch (err) {
+                    console.log(mainImage, "1 image upload to cloudinary error", err)
+                }
+            }
+
+
+            const technicalImage = jsonArray[i]?.["Product Technical Image"];
+            let technicalImageHosted = "";
+
+            if (technicalImage) {
+                try {
+                    const res = await cloudinary.v2.uploader
+                        .upload(`${cloudinaryFolder}/${technicalImage}`, {
+                            folder: '',
+                            resource_type: 'image',
+                            use_filename: true,
+                            unique_filename: false,
+                        });
+                    const imageUrl = res.secure_url;
+                    technicalImageHosted = imageUrl;
+                } catch (err) {
+                    console.log(technicalImage, "2 image upload to cloudinary error", err)
+                }
+            }
+
+
+
+            const hostedImages = technicalImageHosted ? [mainImageHosted, technicalImageHosted] : mainImageHosted ? [mainImageHosted] : undefined;
+
+
+            const productRes = await fetch(`http://localhost:9000/admin/products/${prevProductID}`, {
+                "headers": {
+                    "cookie": cookie,
+                },
+                "method": "GET"
+            });
+            const productData = await productRes.json();
+
+            const productImageURLs = productData?.product?.images?.map((img)=>img.url);
+
+            const allProductImages = hostedImages ? [...productImageURLs, ...hostedImages] : [...productImageURLs];
+
+            const uploadImageBody = {
+                "images": allProductImages
+            }
+
+            await fetch(`http://localhost:9000/admin/products/${prevProductID}`, {
+                "headers": {
+                    "content-type": "application/json",
+                    "cookie": cookie,
+                },
+                "body": JSON.stringify(uploadImageBody),
+                "method": "POST"
+            });
 
         } else {
             const variantPrices = [
@@ -160,7 +230,47 @@ async function abc() {
                     ],
                     "manage_inventory": true
                 }
-            ]
+            ];
+
+            const mainImage = jsonArray[i]?.["product image"];
+            let mainImageHosted = "";
+            if (mainImage) {
+                try {
+                    const res = await cloudinary.v2.uploader
+                        .upload(`${cloudinaryFolder}/${mainImage}`, {
+                            folder: '',
+                            resource_type: 'image',
+                            use_filename: true,
+                            unique_filename: false,
+                        });
+                    const imageUrl = res.secure_url;
+                    mainImageHosted = imageUrl;
+                } catch (err) {
+                    console.log(mainImage, "3 image upload to cloudinary error", err)
+                }
+            }
+
+
+            const technicalImage = jsonArray[i]?.["Product Technical Image"];
+            let technicalImageHosted = "";
+            if (technicalImage) {
+                try {
+                    const res = await cloudinary.v2.uploader
+                        .upload(`${cloudinaryFolder}/${technicalImage}`, {
+                            folder: '',
+                            resource_type: 'image',
+                            use_filename: true,
+                            unique_filename: false,
+                        });
+                    const imageUrl = res.secure_url;
+                    technicalImageHosted = imageUrl;
+                } catch (err) {
+                    console.log(technicalImage, "4 image upload to cloudinary error", err)
+                }
+            }
+
+            const hostedImages = technicalImageHosted ? [mainImageHosted, technicalImageHosted] : mainImageHosted ? [mainImageHosted] : undefined;
+
             //new product
             const body = {
                 "title": productTitle,
@@ -175,6 +285,8 @@ async function abc() {
                 ],
                 "variants": jsonArray[i]?.["Name"]?.split("-")?.[1] ? variantObj : defaultVariantObject,
                 "status": "published",
+                "thumbnail": mainImageHosted,
+                "images": hostedImages,
                 "sales_channels": [
                     {
                         "id": "sc_01HWQMDWNYXNPFBYW355Z2XNXQ"
@@ -184,13 +296,13 @@ async function abc() {
             const res = await fetch("http://localhost:9000/admin/products/", {
                 "headers": {
                     "content-type": "application/json",
-                    "cookie": "__stripe_mid=69b45612-ba0a-415b-8556-c3a51872a18d344a63; connect.sid=s%3ANavuHDkOLpjUf2Pr_f8_qfjcIbDVD9gC.iLa7Y9tE9tsZrVXGgl%2FOMMd0ZhcJ3ArNemqYLgsBu3E; ajs_user_id=usr_01HWQMHRKQPTTR8P91WMFTM36N; ajs_anonymous_id=fc19007d-93cc-48a2-b811-43c2802f1925",
+                    "cookie": cookie,
                 },
                 "body": JSON.stringify(body),
                 "method": "POST"
             });
             const data = await res.json();
-            if(!data?.product){
+            if (!data?.product) {
                 console.log("data", data)
             }
             const productID = data?.product?.id;
@@ -200,7 +312,7 @@ async function abc() {
 
             //update metadata
             const productMetadata = {
-                "attribute": JSON.stringify(getMetadata(jsonArray[i]))
+                "attributes": JSON.stringify(getMetadata(jsonArray[i]))
             };
 
             const productMetadataBody = {
@@ -220,7 +332,7 @@ async function abc() {
             await fetch(`http://localhost:9000/admin/products/${productID}`, {
                 "headers": {
                     "content-type": "application/json",
-                    "cookie": "__stripe_mid=69b45612-ba0a-415b-8556-c3a51872a18d344a63; connect.sid=s%3ANavuHDkOLpjUf2Pr_f8_qfjcIbDVD9gC.iLa7Y9tE9tsZrVXGgl%2FOMMd0ZhcJ3ArNemqYLgsBu3E; ajs_user_id=usr_01HWQMHRKQPTTR8P91WMFTM36N; ajs_anonymous_id=fc19007d-93cc-48a2-b811-43c2802f1925",
+                    "cookie": cookie,
                 },
                 "body": JSON.stringify(productMetadataBody),
                 "method": "POST"
@@ -232,6 +344,3 @@ async function abc() {
     }
 }
 abc();
-
-
-
