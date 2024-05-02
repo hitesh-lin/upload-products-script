@@ -8,15 +8,59 @@ cloudinary.v2.config({
     api_secret: 'PxpElsNYhH0jm2OrW_3qc1SJcEw',
     secure: true,
 });
+// [
+//     "accessible_basins",
+//     "artize_accessories",
+//     "artize_basins",
+//     "artize_flush_plates",
+//     "artize_manual_valves",
+//     "artize_pneumatic_concealed__cisterns_&_frames",
+//     "artize_shower_heads",
+//     "artize_taps",
+//     "artize_thermostatic_concealed_shower_valves",
+//     "artize_wc's",
+//     "artize_wellness",
+//     "basin_wastes_&_bottle_traps",
+//     "bathscreens",
+//     "body_jets",
+//     "douches_&_outlets",
+//     "handsets_&_shower_hoses",
+//     "jaquar_accessories",
+//     "jaquar_basins",
+//     "jaquar_concealed_cistern_&__frames",
+//     "jaquar_flush_plates",
+//     "jaquar_manual_valves",
+//     "jaquar_shower_heads",
+//     "jaquar_taps",
+//     "jaquar_thermostatic_concealed_shower_valves",
+//     "jaquar_wc's",
+//     "jaquar_wellness",
+//     "quadrant_doors",
+//     "shower_arms",
+//     "shower_outlets",
+//     "slide_rails_&_multifunctional_shower_systems",
+//     "sliding_doors",
+//     "smart_wc's",
+//     "tankless_wc's",
+//     "walk_in_panels"
+// ]
 
-const cloudinaryFolder = "../../jaquaruk-e6611f194465/jaquaruk-e6611f194465/accessories";
-const csvFilePath = '../../jaquaruk-e6611f194465/jaquaruk-e6611f194465/accessories/productData.csv'
+const collection_name = "accessible_basins";
+const collection_id = "pcol_01HWWH2BR7W8P1MNDBYZHH34PT";
+
+const cookie = "__stripe_mid=69b45612-ba0a-415b-8556-c3a51872a18d344a63; ajs_user_id=usr_01HWQMHRKQPTTR8P91WMFTM36N; ajs_anonymous_id=fc19007d-93cc-48a2-b811-43c2802f1925; __stripe_sid=d5ea5a60-802c-4ef3-bd9f-7a3ecc6a42d4f8ee22; connect.sid=s%3AfTq0J4VZaX2bFogKwF5_da-_FTcWYWMU.JvvEITRVKaYFWxhk8GWQ62qxX%2B%2BdHpV5s%2FcR%2BmWtKpM";
+
+
+
+
+
+const cloudinaryFolder = `../../jaquaruk-e6611f194465/jaquaruk-e6611f194465/${collection_name}`;
+const csvFilePath = `../../jaquaruk-e6611f194465/jaquaruk-e6611f194465/${collection_name}/productData.csv`;
+
 
 const options = {
     wordwrap: false,
 };
-
-const cookie = "__stripe_mid=69b45612-ba0a-415b-8556-c3a51872a18d344a63; ajs_user_id=usr_01HWQMHRKQPTTR8P91WMFTM36N; ajs_anonymous_id=fc19007d-93cc-48a2-b811-43c2802f1925; connect.sid=s%3Ay3HcmHPb7MUasEh6WLelzK9ljYHgF7AO.%2FjDzC5Gf8gyThbK9r01bcvAZZura6qkDic%2Ffzhi47PI";
 
 const slugify = (str) => {
     return String(str)
@@ -292,7 +336,8 @@ async function abc() {
                     {
                         "id": "sc_01HWQMDWNYXNPFBYW355Z2XNXQ"
                     }
-                ]
+                ],
+                "collection_id": collection_id
             }
             const res = await fetch("http://localhost:9000/admin/products/", {
                 "headers": {
