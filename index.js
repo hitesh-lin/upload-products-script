@@ -45,8 +45,8 @@ cloudinary.v2.config({
 //     "walk_in_panels"
 // ]
 
-const collection_name = "accessible_basins";
-const collection_id = "pcol_01HWWH2BR7W8P1MNDBYZHH34PT";
+const collection_name = "douches_&_outlets";
+const collection_id = "pcol_01HWX8SYQQBJK33X4C97QH8R9Z";
 
 const cookie = "__stripe_mid=69b45612-ba0a-415b-8556-c3a51872a18d344a63; ajs_user_id=usr_01HWQMHRKQPTTR8P91WMFTM36N; ajs_anonymous_id=fc19007d-93cc-48a2-b811-43c2802f1925; connect.sid=s%3AsWmcABZ0vpWySCsnbWRC6gdFulFAfgbv.qGVcGs5Jw4xmZA2RDKaH0uyBiJetvht2%2BailJm6VZEs";
 
@@ -101,26 +101,29 @@ async function abc() {
         const prevProductCodeSuffix = prevProductCode?.split("-")?.[2] || "";
         const currentProductCodeSuffix = jsonArray[i]?.["Product Code"]?.split("-")?.[2];
 
-        const productTitle = jsonArray[i]?.["Name"]?.split("-")?.[0];
+        const lastDashIndex = jsonArray[i]?.["Name"]?.lastIndexOf("-");
+
+        const productTitle = jsonArray[i]?.["Name"]?.substring(0, lastDashIndex < 0 ? jsonArray[i]?.["Name"]?.length : lastDashIndex);
+
         const productHandle = `${slugify(productTitle)}-${jsonArray[i]?.["Product Code"]?.toLowerCase()}`;
         const productDescription = jsonArray[i]?.["Short Description"] ? convert(jsonArray[i]?.["Short Description"], options) : "";
         if (prevProductCodeSuffix === currentProductCodeSuffix) {
             //new variant in same product
             const variantPrices = [
                 {
-                    "amount": parseFloat(jsonArray[i]?.["Price"]) * 100,
+                    "amount": parseFloat((parseFloat(jsonArray[i]?.["Price"]) * 100)?.toFixed(2)),
                     "currency_code": "gbp"
                 },
                 {
-                    "amount": parseFloat(jsonArray[i]?.["Price"]) * 100,
+                    "amount": parseFloat((parseFloat(jsonArray[i]?.["Price"]) * 100)?.toFixed(2)),
                     "currency_code": "usd"
                 },
                 {
-                    "amount": parseFloat(jsonArray[i]?.["Price"]) * 100,
+                    "amount": parseFloat((parseFloat(jsonArray[i]?.["Price"]) * 100)?.toFixed(2)),
                     "currency_code": "eur"
                 }
             ];
-            const variantName = jsonArray[i]?.["Name"]?.split("-")?.[1];
+            const variantName = lastDashIndex >= 0 ? jsonArray[i]?.["Name"]?.substring(lastDashIndex + 1) : "Default";
             const body = {
                 "title": variantName,
                 "material": null,
@@ -233,47 +236,35 @@ async function abc() {
             });
 
         } else {
+            const variantName = lastDashIndex >= 0 ? jsonArray[i]?.["Name"]?.substring(lastDashIndex + 1) : "Default";
+
             const variantPrices = [
                 {
-                    "amount": parseFloat(jsonArray[i]?.["Price"]) * 100,
+                    "amount": parseFloat((parseFloat(jsonArray[i]?.["Price"]) * 100)?.toFixed(2)),
                     "currency_code": "gbp"
                 },
                 {
-                    "amount": parseFloat(jsonArray[i]?.["Price"]) * 100,
+                    "amount": parseFloat((parseFloat(jsonArray[i]?.["Price"]) * 100)?.toFixed(2)),
                     "currency_code": "usd"
                 },
                 {
-                    "amount": parseFloat(jsonArray[i]?.["Price"]) * 100,
+                    "amount": parseFloat((parseFloat(jsonArray[i]?.["Price"]) * 100)?.toFixed(2)),
                     "currency_code": "eur"
                 }
             ];
             const variantObj = [
                 {
-                    "title": jsonArray[i]?.["Name"]?.split("-")?.[1],
+                    "title": variantName,
                     "inventory_quantity": 100,
                     "prices": variantPrices,
                     "allow_backorder": false,
                     "options": [
                         {
-                            "value": jsonArray[i]?.["Name"]?.split("-")?.[1]
+                            "value": variantName
                         }
                     ],
                     "manage_inventory": true,
                     "sku": jsonArray[i]?.["Product Code"]
-                }
-            ];
-            const defaultVariantObject = [
-                {
-                    "title": "Default",
-                    "inventory_quantity": 100,
-                    "prices": variantPrices,
-                    "allow_backorder": false,
-                    "options": [
-                        {
-                            "value": "Default"
-                        }
-                    ],
-                    "manage_inventory": true
                 }
             ];
 
@@ -328,7 +319,7 @@ async function abc() {
                         "title": "Finish"
                     }
                 ],
-                "variants": jsonArray[i]?.["Name"]?.split("-")?.[1] ? variantObj : defaultVariantObject,
+                "variants": variantObj,
                 "status": "published",
                 "thumbnail": mainImageHosted,
                 "images": hostedImages,
@@ -349,7 +340,7 @@ async function abc() {
             });
             const data = await res.json();
             if (!data?.product) {
-                console.log("data", data)
+                console.log("data", JSON.stringify(body), data)
             }
             const productID = data?.product?.id;
             prevProductID = productID;
