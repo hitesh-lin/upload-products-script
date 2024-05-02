@@ -48,7 +48,7 @@ cloudinary.v2.config({
 const collection_name = "accessible_basins";
 const collection_id = "pcol_01HWWH2BR7W8P1MNDBYZHH34PT";
 
-const cookie = "__stripe_mid=69b45612-ba0a-415b-8556-c3a51872a18d344a63; ajs_user_id=usr_01HWQMHRKQPTTR8P91WMFTM36N; ajs_anonymous_id=fc19007d-93cc-48a2-b811-43c2802f1925; __stripe_sid=d5ea5a60-802c-4ef3-bd9f-7a3ecc6a42d4f8ee22; connect.sid=s%3AfTq0J4VZaX2bFogKwF5_da-_FTcWYWMU.JvvEITRVKaYFWxhk8GWQ62qxX%2B%2BdHpV5s%2FcR%2BmWtKpM";
+const cookie = "__stripe_mid=69b45612-ba0a-415b-8556-c3a51872a18d344a63; ajs_user_id=usr_01HWQMHRKQPTTR8P91WMFTM36N; ajs_anonymous_id=fc19007d-93cc-48a2-b811-43c2802f1925; connect.sid=s%3AsWmcABZ0vpWySCsnbWRC6gdFulFAfgbv.qGVcGs5Jw4xmZA2RDKaH0uyBiJetvht2%2BailJm6VZEs";
 
 
 
@@ -334,7 +334,7 @@ async function abc() {
                 "images": hostedImages,
                 "sales_channels": [
                     {
-                        "id": "sc_01HWQMDWNYXNPFBYW355Z2XNXQ"
+                        "id": "sc_01HWWEKWMMG5BNQXT0MQ0KMQ6B"
                     }
                 ],
                 "collection_id": collection_id
@@ -393,7 +393,7 @@ async function abc() {
                 "subtitle": null,
                 "description": productDescription,
                 "type": null,
-                "collection_id": null,
+                "collection_id": collection_id,
                 "tags": [],
                 "categories": [],
                 "discountable": true,
