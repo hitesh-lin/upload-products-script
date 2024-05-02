@@ -83,7 +83,7 @@ async function abc() {
                 "mid_code": null,
                 "hs_code": null,
                 "origin_country": null,
-                "sku": null,
+                "sku": jsonArray[i]?.["Product Code"],
                 "ean": null,
                 "upc": null,
                 "barcode": null,
@@ -214,7 +214,8 @@ async function abc() {
                             "value": jsonArray[i]?.["Name"]?.split("-")?.[1]
                         }
                     ],
-                    "manage_inventory": true
+                    "manage_inventory": true,
+                    "sku": jsonArray[i]?.["Product Code"]
                 }
             ];
             const defaultVariantObject = [
